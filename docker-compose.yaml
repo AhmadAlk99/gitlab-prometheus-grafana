@@ -1,0 +1,107 @@
+# version: '3.6'
+# services:
+#   gitlab:
+#     image: gitlab/gitlab-ee:latest
+#     container_name: gitlab
+#     restart: always
+#     environment:
+#       GITLAB_OMNIBUS_CONFIG: |
+#         external_url 'http://localhost:8929'
+#         gitlab_rails['gitlab_shell_ssh_port'] = 2424
+#         nginx['listen_port'] = 8929
+#     ports:
+#       - '8929:8929'
+#       - '443:443'
+#       - '2424:22'
+#     volumes:
+#       - '$GITLAB_HOME/config:/etc/gitlab'
+#       - '$GITLAB_HOME/logs:/var/log/gitlab'
+#       - '$GITLAB_HOME/data:/var/opt/gitlab'
+#     shm_size: '256m'
+
+
+
+version: '3.5'
+
+services:
+  gitlab-server:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab-server
+    volumes:
+      - './config:/etc/gitlab'
+      - './logs:/var/log/gitlab'
+      - './data:/var/opt/gitlab'
+    ports:
+      - "80:80"
+      - "443:443"
+      - "22:22"
+    networks:
+      - test-network
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.toml:/etc/gitlab-runner/config.toml
+    networks:
+      - test-network
+
+  gitlab-ci-pipelines-exporter:
+    image: mvisonneau/gitlab-ci-pipelines-exporter:0.5.8
+    container_name: gitlab-ci-pipelines-exporter
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.yml:/etc/config.yml
+    command: run --config /etc/config.yml
+    networks:
+      - test-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - test-network
+    command:
+    - '--config.file=/etc/prometheus/prometheus.yml'
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+     - '3000:3000'
+    depends_on:
+      - prometheus
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    name: test
+
+
+
+
+# version: '3'
+
+# services:
+#   gitlab:
+#     image: gitlab/gitlab-ce:latest
+#     container_name: gitlab-server
+#     ports:
+#       - "8080:80"
+#       - "443:443"
+#       - "22:22"
+#     volumes:
+#       - ./config:/etc/gitlab
+#       - ./logs:/var/log/gitlab
+#       - ./data:/var/opt/gitlab
+

@@ -1,0 +1,16 @@
+# Default values for java-test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: a7mdoosh99/test-java
+  tag: "0.2.0"
+
+
+service:
+  protocol: TCP
+  type: LoadBalancer
+  port: 8080
+

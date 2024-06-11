@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Chart.Name }}-service1"
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+  ports:
+    - protocol: {{ .Values.service.protocol }}
+      port: 80
+      targetPort: {{ .Values.service.port }}
+  type: {{ .Values.service.type }}

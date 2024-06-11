@@ -1,0 +1,8 @@
+gitlab:
+  url: http://gitlab-server
+  token: glpat-Ma2agPU6XHxGuar-m9Yy
+projects:
+  - name: root/micro-service
+  - name: root/example-project
+wildcards:
+  - {}
